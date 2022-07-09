@@ -1,14 +1,43 @@
-import 'package:flutter/material.dart';
+import 'dart:io';
+
+import 'package:flutter/material.dart' hide MenuItem;
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:mqtttt/base_scaffold.dart';
 import 'package:mqtttt/mqtt/mqtt_handler.dart';
 import 'package:mqtttt/pages/mqtt_test_screen.dart';
+import 'package:system_tray/system_tray.dart';
 
-void main() {
-  runApp(const MyApp());
+final FlutterLocalNotificationsPlugin notificationsPlugin =
+    FlutterLocalNotificationsPlugin();
+Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  // const AndroidInitializationSettings androidSettings = AndroidInitializationSettings('app_icon');
+  var linuxSettings =
+      LinuxInitializationSettings(defaultActionName: 'mqttt_default');
+  var initialization = InitializationSettings(linux: linuxSettings);
+  await notificationsPlugin.initialize(initialization,
+      onSelectNotification: (String? payload) {
+    print("received $payload as payload");
+  });
+  runApp(MyApp());
 }
 
-class MyApp extends StatelessWidget {
-  const MyApp({Key? key}) : super(key: key);
+class MyApp extends StatefulWidget {
+  MyApp({Key? key}) : super(key: key);
+
+  @override
+  State<MyApp> createState() => _MyAppState();
+}
+
+class _MyAppState extends State<MyApp> {
+  final _systemTray = SystemTray();
+  final _appWindow = AppWindow();
+
+  @override
+  void initState() {
+    super.initState();
+    initSystemTray();
+  }
 
   // This widget is the root of your application.
   @override
@@ -34,6 +63,37 @@ class MyApp extends StatelessWidget {
         ],
       ),
     );
+  }
+
+  Future<void> initSystemTray() async {
+    String path =
+        Platform.isWindows ? 'assets/app_icon.ico' : 'assets/app_icon.png';
+
+    final menu = [
+      MenuItem(label: 'Show', onClicked: _appWindow.show),
+      MenuItem(label: 'Hide', onClicked: _appWindow.hide),
+      MenuItem(label: 'Exit', onClicked: _appWindow.close),
+    ];
+
+    // We first init the systray menu and then add the menu entries
+    await _systemTray.initSystemTray(
+      title: "system tray",
+      iconPath: path,
+    );
+
+    await _systemTray.setContextMenu(menu);
+
+    // handle system tray event
+    _systemTray.registerSystemTrayEventHandler((eventName) {
+      debugPrint("eventName: $eventName");
+      if (eventName == "leftMouseDown") {
+      } else if (eventName == "leftMouseUp") {
+        _systemTray.popUpContextMenu();
+      } else if (eventName == "rightMouseDown") {
+      } else if (eventName == "rightMouseUp") {
+        _appWindow.show();
+      }
+    });
   }
 }
 

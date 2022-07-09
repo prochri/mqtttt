@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:mqtttt/main.dart';
 import 'package:mqtttt/mqtt/mqtt_handler.dart';
 
 class MQTTTest extends StatefulWidget {
@@ -31,6 +32,10 @@ class _MQTTTestState extends State<MQTTTest> {
           },
           child: Text('push home page'),
         ),
+        TextButton(onPressed: () async {
+          await notificationsPlugin.show(2, 'MQTTTT', 'This is a test notification', null);
+          print('shown');
+        }, child: Text('notification'))
       ],
     );
   }
