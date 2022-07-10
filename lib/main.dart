@@ -3,9 +3,10 @@ import 'dart:io';
 import 'package:flutter/material.dart' hide MenuItem;
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:mqtttt/base_scaffold.dart';
-import 'package:mqtttt/mqtt/mqtt_handler.dart';
+import 'package:mqtttt/services/mqtt_handler.dart';
 import 'package:mqtttt/pages/mqtt_test_screen.dart';
 import 'package:system_tray/system_tray.dart';
+import 'package:mqtttt/pages/subscribe_page.dart';
 
 final FlutterLocalNotificationsPlugin notificationsPlugin =
     FlutterLocalNotificationsPlugin();
@@ -13,7 +14,7 @@ Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   // const AndroidInitializationSettings androidSettings = AndroidInitializationSettings('app_icon');
   var linuxSettings =
-      LinuxInitializationSettings(defaultActionName: 'mqttt_default');
+      LinuxInitializationSettings(defaultActionName: 'mqtt testing tool');
   var initialization = InitializationSettings(linux: linuxSettings);
   await notificationsPlugin.initialize(initialization,
       onSelectNotification: (String? payload) {
@@ -59,6 +60,7 @@ class _MyAppState extends State<MyApp> {
       home: BaseScaffold(
         pages: [
           BaseScaffoldPage('Home Page', Icons.home, const MyHomePage()),
+          BaseScaffoldPage('Subscribe', Icons.home, SubscribePage()),
           BaseScaffoldPage('Settings', Icons.settings, MQTTTest()),
         ],
       ),

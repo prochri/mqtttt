@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:mqtttt/main.dart';
-import 'package:mqtttt/mqtt/mqtt_handler.dart';
+import 'package:mqtttt/services/mqtt_handler.dart';
 
 class MQTTTest extends StatefulWidget {
   MQTTTest({Key? key}) : super(key: key);
@@ -13,8 +13,7 @@ class _MQTTTestState extends State<MQTTTest> {
   MQTTHandler? _mqtt;
 
   void _reloadMqtt() {
-    _mqtt = MQTTHandler();
-    _mqtt?.connect();
+    MQTTHandler.recreateInstance();
   }
 
   @override
