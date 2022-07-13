@@ -2,7 +2,9 @@ import 'dart:io';
 
 import 'package:flutter/material.dart' hide MenuItem;
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:flutter_settings_screens/flutter_settings_screens.dart';
 import 'package:mqtttt/base_scaffold.dart';
+import 'package:mqtttt/pages/settings_page.dart';
 import 'package:mqtttt/services/mqtt_handler.dart';
 import 'package:mqtttt/pages/mqtt_test_screen.dart';
 import 'package:system_tray/system_tray.dart';
@@ -20,6 +22,7 @@ Future<void> main() async {
       onSelectNotification: (String? payload) {
     print("received $payload as payload");
   });
+  await Settings.init();
   runApp(MyApp());
 }
 
@@ -61,7 +64,8 @@ class _MyAppState extends State<MyApp> {
         pages: [
           BaseScaffoldPage('Home Page', Icons.home, const MyHomePage()),
           BaseScaffoldPage('Subscribe', Icons.home, SubscribePage()),
-          BaseScaffoldPage('Settings', Icons.settings, MQTTTest()),
+          BaseScaffoldPage('MQTT test', Icons.settings, MQTTTest()),
+          BaseScaffoldPage('Settings', Icons.settings, SettingsPage()),
         ],
       ),
     );
