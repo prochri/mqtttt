@@ -6,8 +6,10 @@ import 'package:flutter_settings_screens/flutter_settings_screens.dart'
 /// wrapper class around settings from flutter_settings_screens
 class Settings {
   static SingleSetting<String> hostname = SingleSetting("mqtt-server-hostname", "localhost");
-  static SingleSetting<String?> username = SingleSetting.nullable("mqtt-server-username");
-  static SingleSetting<String?> password = SingleSetting.nullable("mqtt-server-password");
+  static SingleSetting<String> username = SingleSetting("mqtt-server-username", "");
+  static SingleSetting<String> password = SingleSetting("mqtt-server-password", "");
+
+  static SingleSetting<String> devicePrefix = SingleSetting("device-prefix", "");
 
   static SingleSetting<bool> darkMode = SingleSetting("app-dark-mode", false);
 }
@@ -19,9 +21,7 @@ class SingleSetting<T> {
   final T defaultValue;
   T get value {
     var v = screen_settings.Settings.getValue<T>(settingKey);
-    if (v == null) {
-      value = defaultValue;
-    }
+    v ??= defaultValue;
     return v!;
   }
 

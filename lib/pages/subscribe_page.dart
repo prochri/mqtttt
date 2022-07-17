@@ -3,6 +3,8 @@ import 'package:mqtttt/models/subscription.dart';
 import 'package:mqtttt/services/mqtt_handler.dart';
 import 'package:mqtttt/widgets/add_subscription.dart';
 
+import '../models/topic_handler.dart';
+
 class SubscribePage extends StatefulWidget {
   SubscribePage({Key? key}) : super(key: key);
 
@@ -45,8 +47,9 @@ class _SubscribePageState extends State<SubscribePage> {
           separatorBuilder: (context, index) => const Divider(),
           itemBuilder: (context, index) {
             _mqttHandler.subscriptions[index].toString();
-            return Text(
-                "${_mqttHandler.subscriptions.length} ${_mqttHandler.subscriptions[index].topic} ${_mqttHandler.connected}");
+            return Text("hi");
+            // return Text(
+            //     "${_mqttHandler.subscriptions.length} ${_mqttHandler.subscriptions[index].topic} ${_mqttHandler.connected}");
           },
         ),
       )
@@ -58,7 +61,7 @@ class _SubscribePageState extends State<SubscribePage> {
         context: context, builder: (context) => const AddSubscription());
     if (topic == null) return;
     setState(() {
-      _mqttHandler.addSubscription(Subscription(topic));
+      _mqttHandler.addSubscription(topic, TopicHandler());
     });
   }
 }

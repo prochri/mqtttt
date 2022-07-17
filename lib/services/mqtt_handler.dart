@@ -5,6 +5,7 @@ import 'package:mqtttt/main.dart';
 import 'package:mqtttt/models/subscription.dart' as models;
 import 'package:mqtt_client/mqtt_client.dart';
 import 'package:mqtt_client/mqtt_server_client.dart';
+import 'package:mqtttt/models/topic_handler.dart';
 
 import 'settings.dart';
 
@@ -22,18 +23,21 @@ class MQTTHandler {
     _instance.connect();
   }
 
-  final _client = MqttServerClient('192.168.178.100', 'flutter_client');
+  final _client;
   bool _connected = false;
   bool get connected {
     return _connected;
   }
 
-  List<models.Subscription> _subscriptions = [];
-  List<models.Subscription> get subscriptions {
+  List<String> _subscriptions = [];
+  List<String> get subscriptions {
     return _subscriptions;
   }
 
-  MQTTHandler() {}
+  Map<String, TopicHandler> topicHandler = {};
+
+  MQTTHandler()
+      : _client = MqttServerClient(Settings.hostname.value, 'flutter_client');
 
   void restart() {
     print("restarting");
@@ -41,13 +45,14 @@ class MQTTHandler {
     connect();
   }
 
-  void addSubscription(models.Subscription subscription) {
-    Subscription? s =
-        _client.subscribe(subscription.topic, MqttQos.exactlyOnce);
-    subscriptions.add(subscription);
+  void addSubscription(String topic, TopicHandler topicHandler) {
+    Subscription? s = _client.subscribe(topic, MqttQos.exactlyOnce);
+    print("${s?.messageIdentifier} $s ##################################3");
+    subscriptions.add(topic);
+    this.topicHandler[topic] = topicHandler;
   }
 
-  void connect() async {
+  Future<void> connect() async {
     _client.logging(on: true);
     _client.setProtocolV311();
     _client.keepAlivePeriod = 20;
@@ -62,11 +67,8 @@ class MQTTHandler {
     _client.connectionMessage = connMess;
     try {
       await _client.connect();
-      print("sucessfull conection ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
     } on NoConnectionException catch (e) {
       // Raised by the client when connection fails.
-      print("unsucessfull conection !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
-      print('MQTTHandler::client exception - $e');
       _client.disconnect();
       return;
     } on SocketException catch (e) {
@@ -78,28 +80,19 @@ class MQTTHandler {
 
     _client.updates!.listen((messageList) {
       print("received ${messageList.length}");
-      messageList.forEach((element) {
-        final msg = element.payload;
-        if (msg is! MqttPublishMessage) return;
-        final message =
-            MqttPublishPayload.bytesToStringAsString(msg.payload.message);
-        var topicId = _client.subscriptionsManager!
-            .subscriptions[element.topic]!.messageIdentifier!;
-
-        if (!Platform.isWindows) {
-          notificationsPlugin
-              .show(topicId, "Received MQTT message for topic ${element.topic}",
-                  message, null)
-              .catchError((err) => print("error $err"));
-        }
-        print("${element.topic}, $topicId, ${message}");
-      });
+      messageList.forEach(messageHandler);
     });
-    addSubscription(models.Subscription("a/b"));
 
     final builder = MqttClientPayloadBuilder();
     builder.addString("hello from flutter");
     _client.publishMessage("a/b", MqttQos.exactlyOnce, builder.payload!);
+  }
+
+  void messageHandler(MqttReceivedMessage<MqttMessage> receivedMessage) {
+    final msg = receivedMessage.payload;
+    if (msg is! MqttPublishMessage) return;
+    final messageContent = msg.payload.message;
+    topicHandler[receivedMessage.topic]?.call(messageContent);
   }
 
   // callback examples
