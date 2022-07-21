@@ -20,6 +20,7 @@ class MQTTHandler {
   static recreateInstance() {
     print('recreate MQTTHandler');
     _instance = MQTTHandler();
+    print('recreate MQTTHandler');
     _instance.connect();
   }
 
@@ -45,7 +46,7 @@ class MQTTHandler {
     connect();
   }
 
-  void addSubscription(String topic, TopicHandler topicHandler) {
+  void registerTopic(String topic, TopicHandler topicHandler) {
     Subscription? s = _client.subscribe(topic, MqttQos.exactlyOnce);
     print("${s?.messageIdentifier} $s ##################################3");
     subscriptions.add(topic);

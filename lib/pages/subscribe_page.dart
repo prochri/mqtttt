@@ -61,7 +61,7 @@ class _SubscribePageState extends State<SubscribePage> {
         context: context, builder: (context) => const AddSubscription());
     if (topic == null) return;
     setState(() {
-      _mqttHandler.addSubscription(topic, TopicHandler());
+      _mqttHandler.registerTopic(topic, TopicHandler());
     });
   }
 }
